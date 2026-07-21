@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #SBATCH --job-name=DS-SNS
 #SBATCH --exclusive
 #SBATCH --nodes=1
