@@ -5,6 +5,8 @@ set -euo pipefail
 module unload mpi
 
 # Bytes per equation is ~715 on amd01
+# Problem size is hardcoded for nextgenio-amd01 which free reports as having
+# 270269554688 bytes of memory capacity
 NX="${NX:-144}"
 NY="${NY:-144}"
 NZ="${NZ:-144}"
@@ -52,7 +54,7 @@ fi
 NUM_MPI_RANKS=$(( NUM_CORES / OMP_NUM_THREADS / DIV_SMT ))
 RANKS_PER_CCX=$(( CORES_PER_CCX / OMP_NUM_THREADS ))
 
-RUN_ROOT=$(print_run_root "$PWD" "amd_")
+RUN_ROOT=$(print_run_root "$PWD" "amd_nosweep_")
 mkdir -p "$RUN_ROOT"
 
 write_hpcg_dat "$RUN_ROOT" "$NX" "$NY" "$NZ" "$HPCG_RUN_TIME"
