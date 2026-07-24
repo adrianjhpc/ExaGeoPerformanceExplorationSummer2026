@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Make sure we don't use Intel MPI, spack will load OpenMPI for us
-module unload mpi
+module unload mpi openmpi mpich
 
 # Bytes per equation is ~715 on amd01
 # Problem size is hardcoded for nextgenio-amd01 which free reports as having
