@@ -2,8 +2,8 @@
 #SBATCH --job-name=ihpcgSN
 #SBATCH --exclusive
 #SBATCH --nodes=1
-#SBATCH --ntasks=2
-#SBATCH --ntasks-per-socket=1
+#SBATCH --ntasks=1
+#SBATCH --hint=nomultithread
 #SBATCH --cpus-per-task=24
 #SBATCH --time=01:00:00
 #SBATCH --nvram-options=none
@@ -30,10 +30,10 @@ if [[ ! -x "$XHPCG_SKX_PATH" ]]; then
 fi
 
 export OMP_NUM_THREADS=24
-export MKL_NUM_THREADS=24
-export OMP_PROC_BIND=close
-export OMP_PLACES=cores
-export KMP_AFFINITY=granularity=fine,compact,1,0
+# export MKL_NUM_THREADS=24
+# export OMP_PROC_BIND=close
+# export OMP_PLACES=cores
+export KMP_AFFINITY=granularity=fine,compact
 
 HPCG_COMMON=""
 for _dir in \
@@ -61,4 +61,4 @@ write_hpcg_dat "$RUN_ROOT" "$NX" "$NY" "$NZ" "$HPCG_RUN_TIME"
 
 cd "$RUN_ROOT" || exit 1
 
-srun --cpu-bind=verbose,ldoms "$XHPCG_SKX_PATH"
+srun --cpu-bind=verbose --mem-bind=local "$XHPCG_SKX_PATH"
