@@ -12,6 +12,8 @@ set -euo pipefail
 #   sbatch --export=ALL,COLLECTIVE_NP=48...
 
 module load mpi/2021.15
+# I'm not entirely sure why, but psm2 doesn't work when sceduling more than 1
+# task per node. verbs doesn't have this problem
 export FI_PROVIDER=verbs
 
 MODE="${1:-intra}"
