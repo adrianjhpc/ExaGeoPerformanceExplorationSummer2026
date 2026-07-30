@@ -2,20 +2,20 @@
 #SBATCH --job-name=DS-SNS
 #SBATCH --exclusive
 #SBATCH --nodes=1
-#SBATCH --time=04:00:00
+#SBATCH --time=05:00:00
 #SBATCH --nvram-options=none
 # Must request highest CPU count we intend to use upfront
 #SBATCH --ntasks=96
 
 set -euo pipefail
 
-module load compiler/2023.0.0
+# module load compiler/2023.0.0
 # module load memkind/1.12.0
 # module load pmdk/1.11.1
 
 # Uncomment if you need a non-default path, or, leave commented out and set on
 # command line
-# DSTREAM_BIN="/path/to/distributed_streams
+# DSTREAM_BIN="/path/to/distributed_streams"
 
 # We use the values below to calculate the number of STREAM_TYPE (double or 
 # float) it takes to fill the L3 cache on NextGenIO's compute nodes. See 
@@ -48,27 +48,32 @@ N_ARRAY_ELEMENTS=$(( ( ( ( LL_CACHE_SIZE / STREAM_TYPE_SIZE ) *
                     ( 1024 * MAX_TOTAL_CPUS ) ))
 
 
-SWEEP_COMMON=""
+SWEEP_COMMON=''
+MPI_WRAPPER=''
 for _dir in \
     "${SLURM_SUBMIT_DIR:-}" \
     "$(dirname "${BASH_SOURCE[0]}")" \
     "$HOME/benchmarks"; do
     if [[ -f "$_dir/sweep_common.sh" ]]; then
         SWEEP_COMMON="$_dir/sweep_common.sh"
-        break
+    fi
+    if [[ -f "$_dir/mpi_wrapper.sh" ]]; then
+        MPI_WRAPPER="$_dir/mpi_wrapper.sh"
     fi
 done
 
-if [[ -z "$SWEEP_COMMON" ]]; then
-    printf 'ERROR: sweep_common.sh not found.\n' >&2
-    exit 1
-fi
 # shellcheck source=./sweep_common.sh
 source "$SWEEP_COMMON"
+# shellcheck source=./mpi_wrapper.sh
+source "$MPI_WRAPPER"
 
 DSTREAM_BIN="${DSTREAM_BIN:-$HOME/benchmarks/DistributedStream/\
 src/distributed_streams}"
 BINARY_PATH=$(resolve_binary DSTREAM_BIN "$DSTREAM_BIN") || exit 1
+
+UTC_NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+RUN_DIR="DS_single_node_sweep_${UTC_NOW}"
+mkdir -p "$RUN_DIR" && cd "$RUN_DIR" || exit 1
 
 run_benchmark() {
     local ntasks="$1"
