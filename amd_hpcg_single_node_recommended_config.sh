@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 # Make sure we don't use Intel MPI, spack will load OpenMPI for us
 module unload mpi openmpi mpich
 
@@ -11,11 +13,12 @@ NX="${NX:-144}"
 NY="${NY:-144}"
 NZ="${NZ:-144}"
 HPCG_RUN_TIME="${HPCG_RUN_TIME:-60}"
+AOCC_VERSION='5.2.0'
 
 HPCG_COMMON=""
 for _dir in \
     "${SLURM_SUBMIT_DIR:-}" \
-    "$(dirname "${BASH_SOURCE[0]}")" \
+    "$SCRIPT_DIR" \
     "$HOME/benchmarks"; do
     if [[ -f "$_dir/hpcg_common.sh" ]]; then
         HPCG_COMMON="$_dir/hpcg_common.sh"
@@ -59,7 +62,7 @@ mkdir -p "$RUN_ROOT"
 
 write_hpcg_dat "$RUN_ROOT" "$NX" "$NY" "$NZ" "$HPCG_RUN_TIME"
 
-spack load hpcg %aocc
+spack load hpcg %aocc@"$AOCC_VERSION"
 
 cd "$RUN_ROOT" || exit 1
 export LD_LIBRARY_PATH="$AOCC_LOC/lib:$LD_LIBRARY_PATH"
