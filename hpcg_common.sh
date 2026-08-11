@@ -4,7 +4,7 @@ print_run_root() {
     local prefix="${1:-$PWD}"
     local tag="${2:-}"
     local utc_now
-    utc_now=$(date -u +%Y-%m-%dT%H%_M%_SZ)
+    utc_now=$(date -u +%Y-%m-%dT%H%M%SZ)
     local run_root="${prefix}/${tag}hpcg_run_${utc_now}"
     printf "%s\n" "$run_root"
 }
