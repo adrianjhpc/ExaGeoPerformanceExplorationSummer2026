@@ -6,10 +6,11 @@
 #SBATCH --nvram-options=none
 # Must request highest CPU count we intend to use upfront
 #SBATCH --ntasks=96
-
 set -euo pipefail
 
-# module load compiler/2023.0.0
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+module load mpi/2021.15 libfabric/1.13.0
 # module load memkind/1.12.0
 # module load pmdk/1.11.1
 
@@ -24,14 +25,18 @@ set -euo pipefail
 # DistributedSteam to use float) being used, in bytes
 STREAM_TYPE_SIZE=8
 # Size of the last level CPU cache, in bytes
-LL_CACHE_SIZE=37486592
+# normal CN: 37486592
+# amd01: 1677216
+# icx: 44040192
+# gnr: 1056964608 (2 instances)
+LL_CACHE_SIZE=44040192
 # How many times DistributedStream will repeat the benchmark before 
 # calculating the min/max/mean
 N_RUNS=30
 # Change this to point to where you installed Mini-XML
 MXML_LIB_PATH="$HOME/mxml/lib"
-
-MAX_TOTAL_CPUS="$SLURM_NTASKS"
+N_PROC=$(nproc)
+MAX_TOTAL_CPUS="${MAX_TOTAL_CPUS:-${SLURM_NTASKS:-$N_PROC}}"
 # Make this > than MAX_TOTAL_CPUS if you want to test oversubscription e.g.
 # MAX_TOTAL_THREADS=$(( 2 * MAX_TOTAL_CPUS ))
 MAX_TOTAL_THREADS="$MAX_TOTAL_CPUS"
@@ -47,12 +52,19 @@ N_ARRAY_ELEMENTS=$(( ( ( ( LL_CACHE_SIZE / STREAM_TYPE_SIZE ) *
                     MAX_TOTAL_CPUS ) / ( ARRAY_SCALE ) ) + 
                     ( 1024 * MAX_TOTAL_CPUS ) ))
 
+RUNNER="${RUNNER:-auto}" # auto, slurm, or mpi
+declare -a SLURM_LAUNCH_ARGS
+
+export FI_PROVIDER="${FI_PROVIDER:-verbs}"
+# Set to 1 if you are testing on Granite Rapids
+RUNNING_ON_GNR="${RUNNING_ON_GNR:-0}"
 
 SWEEP_COMMON=''
 MPI_WRAPPER=''
 for _dir in \
     "${SLURM_SUBMIT_DIR:-}" \
-    "$(dirname "${BASH_SOURCE[0]}")" \
+    "$SCRIPT_DIR" \
+    "$HOME" \
     "$HOME/benchmarks"; do
     if [[ -f "$_dir/sweep_common.sh" ]]; then
         SWEEP_COMMON="$_dir/sweep_common.sh"
@@ -67,6 +79,36 @@ source "$SWEEP_COMMON"
 # shellcheck source=./mpi_wrapper.sh
 source "$MPI_WRAPPER"
 
+# Override mpi_configure_default and do nothing
+mpi_configure_user() {
+    true
+}
+
+run() {
+    case "$RUNNER" in
+        slurm)
+            command -v srun > /dev/null 2>&1 ||
+                { printf "srun not found\n" >&2; return 1; }
+            srun "${SLURM_LAUNCH_ARGS[@]}" "$@"
+            ;;
+        mpi)
+            mpi_run "$@"
+            ;;
+        auto)
+            if [[ -n "${SLURM_JOB_ID:-}" ]] &&
+                command -v srun > /dev/null 2>&1; then
+                srun "${SLURM_LAUNCH_ARGS[@]}" "$@"
+            else
+                mpi_run "$@"
+            fi
+            ;;
+        *)
+            printf "Invalid RUNNER=%s\n" "$RUNNER" >&2
+            return 2
+            ;;
+    esac
+}
+
 DSTREAM_BIN="${DSTREAM_BIN:-$HOME/benchmarks/DistributedStream/\
 src/distributed_streams}"
 BINARY_PATH=$(resolve_binary DSTREAM_BIN "$DSTREAM_BIN") || exit 1
@@ -80,12 +122,40 @@ run_benchmark() {
     local cpus_per_task="$2"
     local threads_per_task="$3"
 
-    OMP_NUM_THREADS="$threads_per_task" \
-    LD_LIBRARY_PATH="$MXML_LIB_PATH:${LD_LIBRARY_PATH:-}" \
-    srun --exclusive \
-        --ntasks="$ntasks" \
-        --cpus-per-task="$cpus_per_task" \
-        "$BINARY_PATH" "$N_ARRAY_ELEMENTS" "$N_RUNS"
+    export OMP_NUM_THREADS="$threads_per_task"
+    export LD_LIBRARY_PATH="$MXML_LIB_PATH:${LD_LIBRARY_PATH:-}"
+    SLURM_LAUNCH_ARGS=(
+        --ntasks="$ntasks"
+        --cpus-per-task="$cpus_per_task"
+    )
+    # From mpi_wrapper.sh
+    mpi_detect_implementation
+    MPI_ARGS=()
+    case "$MPI_IMPL" in
+        openmpi)
+            MPI_ARGS+=(--host localhost)
+            MPI_ARGS+=(-np "$ntasks")
+            MPI_ARGS+=(--map-by slot:PE="$cpus_per_task")
+            MPI_ARGS+=(--bind-to core)
+            MPI_ARGS+=(-x FI_PROVIDER)
+            if (( RUNNING_ON_GNR )); then
+                MPI_ARGS+=(--mca btl 'self,sm')
+            fi
+            ;;
+        intel)
+            MPI_ARGS+=(-hosts localhost)
+            MPI_ARGS+=(-n "$ntasks")
+            MPI_ARGS+=(-genv I_MPI_PIN_DOMAIN "$cpus_per_task")
+            if (( RUNNING_ON_GNR )); then
+                MPI_ARGS+=(-genv I_MPI_FABRICS shm)
+            fi
+            MPI_ARGS+=(-genvlist FI_PROVIDER)
+            ;;
+        *)
+            printf "Not setting args for unsupported MPI implementation\n"
+            ;;
+    esac
+    run "$BINARY_PATH" "$N_ARRAY_ELEMENTS" "$N_RUNS"
 }
 
 # from sweep_common.sh
