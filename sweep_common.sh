@@ -68,9 +68,10 @@ validate_and_print() {
 
     local m='\nRunning: %u rank(s), %u CPU(s)/rank, %u thread(s)/rank, '
          m+='%u total CPU(s), %u total thread(s)\n'
-    printf "%s" "$m" \
-        "$ntasks" "$cpus_per_task" "$threads_per_task" \
-        "$total_cpus" "$total_threads"
+    # m is a format string
+    # shellcheck disable=SC2059
+    printf "$m" "$ntasks" "$cpus_per_task" "$threads_per_task" "$total_cpus" \
+        "$total_threads"
 }
 
 # Iterate all the same task/cpus-per-task combinations for any

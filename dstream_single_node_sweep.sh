@@ -113,8 +113,8 @@ DSTREAM_BIN="${DSTREAM_BIN:-$HOME/benchmarks/DistributedStream/\
 src/distributed_streams}"
 BINARY_PATH=$(resolve_binary DSTREAM_BIN "$DSTREAM_BIN") || exit 1
 
-UTC_NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-RUN_DIR="DS_single_node_sweep_${UTC_NOW}"
+UTC_NOW=$(date -u +%Y-%m-%dT%H%M%SZ)
+RUN_DIR="ds_single_node_sweep_${UTC_NOW}"
 mkdir -p "$RUN_DIR" && cd "$RUN_DIR" || exit 1
 
 run_benchmark() {
