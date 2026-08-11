@@ -4,7 +4,7 @@ print_run_root() {
     local prefix="${1:-$PWD}"
     local tag="${2:-}"
     local utc_now
-    utc_now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+    utc_now=$(date -u +%Y-%m-%dT%H%_M%_SZ)
     local run_root="${prefix}/${tag}hpcg_run_${utc_now}"
     printf "%s\n" "$run_root"
 }
@@ -24,17 +24,17 @@ write_hpcg_dat() {
     local nx="$2"
     local ny="$3"
     local nz="$4"
-    local time="$5"
+    local run_time="$5"
 
     if [[ -z "${target_dir}" || \
-          -z "${nx}" || -z "${ny}" || -z "${nz}" || -z "${time}" ]]; then
-        printf "Usage: write_hpcg_dat <target_dir> <nx> <ny> <nz> <time>\n" >&2
+          -z "${nx}" || -z "${ny}" || -z "${nz}" || -z "${run_time}" ]]; then
+        printf "Usage: write_hpcg_dat <target_dir> <nx> <ny> <nz> <run_time>\n" >&2
         return 1
     fi
 
     if ! [[ "${nx}" =~ ^[0-9]+$ && "${ny}" =~ ^[0-9]+$ && \
-            "${nz}" =~ ^[0-9]+$ && "${time}" =~ ^[0-9]+$ ]]; then
-        printf "Error: nx, ny, nz, and time must be positive integers.\n" >&2
+            "${nz}" =~ ^[0-9]+$ && "${run_time}" =~ ^[0-9]+$ ]]; then
+        printf "Error: nx, ny, nz, and run_time must be positive integers.\n" >&2
         return 1
     fi
 
@@ -45,15 +45,15 @@ write_hpcg_dat() {
     fi
 
     local filepath="${target_dir}/hpcg.dat"
-    cat > "${filepath}" <<EOF
+    
+    if ! cat > "${filepath}" <<EOF
 HPCG benchmark input file
 Sandia National Laboratories; University of Tennessee, Knoxville
 ${nx} ${ny} ${nz}
-${time}
+${run_time}
 EOF
-
-    if [[ $? -ne 0 ]]; then
-        printf "Error: failed to write '%s'.\n", "${filepath}" >&2
+    then
+        printf "Error: failed to write '%s'.\n" "${filepath}" >&2
         return 1
     fi
 }
