@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 # Must request highest CPU count we intend to use upfront
 #SBATCH --ntasks=96
-#SBATCH --time=04:00:00
+#SBATCH --time=168:00:00
 #SBATCH --nvram-options=none
 
 set -euo pipefail
@@ -18,7 +18,7 @@ module load mpi/2021.15
 # Set to 1 if you are testing on Granite Rapids
 RUNNING_ON_GNR="${RUNNING_ON_GNR:-0}"
 RUNNER="${RUNNER:-auto}" # auto, slurm, or mpi
-# Set to 1 to clamp the problem size to a max of 432^3 to prevent crashes for
+# Set to 1 to clamp the problem size to a max of 424^3 to prevent crashes for
 # large problem sizes. This will however mean the problem size may not meet
 # the 25% memory capacity requirement for a fair test
 # I added this because I had difficulty compiling AMD's HPCG with 64-bit
@@ -131,7 +131,7 @@ round_mult8() {
     awk -v s="$1" -v clamp="${2:-0}" 'BEGIN {
         n = int((s + 4) / 8) * 8
         if (n < 24) n = 24
-        if ((clamp == "1" || clamp == "true") && n > 432) n = 432
+        if ((clamp == "1" || clamp == "true") && n > 424) n = 424
         print n
     }'
 }
@@ -169,7 +169,7 @@ run() {
 # From hpcg_common.sh
 RUN_ROOT=$(print_run_root "${SLURM_SUBMIT_DIR:-$PWD}" "")
 if [[ "$CLAMP_PROB_SIZE" -gt 0 || "$CLAMP_PROB_SIZE" == 'true'  ]]; then
-    printf 'CLAMP_PROB_SIZE is ON. Problem size limited to 432^3\n'
+    printf 'CLAMP_PROB_SIZE is ON. Problem size limited to 424^3\n'
 fi
 
 run_benchmark() {
