@@ -23,9 +23,6 @@ module load mpi/2021.15
 # icx: 2
 # gnr: 2
 NTASKS=2
-# normal free -b: 201326964736
-# icx free -b: 270076346368
-# gnr free -b: 1622905081856
 # Use calc_hpcg_problem_size.py to get problem size
 # normal: 328,328,328
 # icx: 360,360,368
