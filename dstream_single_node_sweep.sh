@@ -114,7 +114,11 @@ BINARY_PATH=$(resolve_binary DSTREAM_BIN "$DSTREAM_BIN") || exit 1
 
 UTC_NOW=$(date -u +%Y-%m-%dT%H%M%SZ)
 RUN_DIR="ds_single_node_sweep_${UTC_NOW}"
-mkdir -p "$RUN_DIR" && cd "$RUN_DIR" || exit 1
+mkdir -p "$RUN_DIR"
+
+FAILED_LOG="$RUN_ROOT/failed_runs.log"
+
+cd "$RUN_DIR" || exit 1
 
 run_benchmark() {
     local ntasks="$1"
