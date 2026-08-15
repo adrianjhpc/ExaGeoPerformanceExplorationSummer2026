@@ -7,8 +7,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 module unload mpi openmpi mpich
 
 # Bytes per equation is ~715 on amd01
-# Problem size is hardcoded for nextgenio-amd01 which free reports as having
-# 270269554688 bytes of memory capacity
+# Problem size is hardcoded for nextgenio-amd01
 NX="${NX:-144}"
 NY="${NY:-144}"
 NZ="${NZ:-144}"
