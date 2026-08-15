@@ -25,10 +25,6 @@ module load mpi/2021.15 libfabric/1.13.0
 # DistributedSteam to use float) being used, in bytes
 STREAM_TYPE_SIZE=8
 # Size of the last level CPU cache, in bytes
-# normal CN: 37486592
-# amd01: 1677216
-# icx: 44040192
-# gnr: 1056964608 (2 instances)
 LL_CACHE_SIZE=44040192
 # How many times DistributedStream will repeat the benchmark before 
 # calculating the min/max/mean
@@ -79,6 +75,9 @@ source "$SWEEP_COMMON"
 # shellcheck source=./mpi_wrapper.sh
 source "$MPI_WRAPPER"
 
+# From mpi_wrapper.sh
+mpi_detect_implementation || exit 1
+
 # Override mpi_configure_default and do nothing
 mpi_configure_user() {
     true
@@ -128,8 +127,7 @@ run_benchmark() {
         --ntasks="$ntasks"
         --cpus-per-task="$cpus_per_task"
     )
-    # From mpi_wrapper.sh
-    mpi_detect_implementation
+
     MPI_ARGS=()
     case "$MPI_IMPL" in
         openmpi)
