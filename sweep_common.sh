@@ -100,7 +100,17 @@ run_sweep() {
         local cpt
         for (( cpt = 1; cpt <= max_cpus_per_task; cpt++ )); do
             validate_and_print "$ntasks" "$cpt" "$cpt" || continue
-            run_benchmark "$ntasks" "$cpt" "$cpt"
+            if ! run_benchmark "$ntasks" "$cpt" "$cpt"; then
+                local msg='WARNING: run FAILED: ntasks=%u cpus_per_task=%u'
+                msg+='threads_per_task=%u (see %s)\n'
+                # msg is a format string
+                # shellcheck disable=SC2059
+                printf "$msg" \
+                "$ntasks" "$cpt" "$cpt" "${FAILED_LOG:-failed_runs.log}" >&2
+                printf '%s ntasks=%u cpus_per_task=%u threads_per_task=%u\n' \
+                "$(date -u +%Y-%m-%dT%H%M%SZ)" "$ntasks" "$cpt" "$cpt" \
+                >> "${FAILED_LOG:-failed_runs.log}"
+            fi
         done
 
         # Phase 2 (optional): keep CPUs at max, oversubscribe threads

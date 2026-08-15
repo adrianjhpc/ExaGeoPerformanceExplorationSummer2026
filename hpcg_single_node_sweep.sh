@@ -125,6 +125,9 @@ source "$HPCG_COMMON"
 # shellcheck source=./mpi_wrapper.sh
 source "$MPI_WRAPPER"
 
+# From mpi_wrapper.sh
+mpi_detect_implementation || exit 1
+
 BINARY_PATH=$(resolve_binary XHPCG_BIN "$XHPCG_BIN") || exit 1
 
 round_mult8() {
@@ -168,6 +171,9 @@ run() {
 
 # From hpcg_common.sh
 RUN_ROOT=$(print_run_root "${SLURM_SUBMIT_DIR:-$PWD}" "")
+
+FAILED_LOG="$RUN_ROOT/failed_runs.log"
+
 if [[ "$CLAMP_PROB_SIZE" -gt 0 || "$CLAMP_PROB_SIZE" == 'true'  ]]; then
     printf 'CLAMP_PROB_SIZE is ON. Problem size limited to 424^3\n'
 fi
@@ -212,8 +218,6 @@ run_benchmark() {
     export OMP_NUM_THREADS="$threads_per_task"
     export MKL_NUM_THREADS="$threads_per_task"
 
-    # From mpi_wrapper.sh
-    mpi_detect_implementation
     MPI_ARGS=()
     case "$MPI_IMPL" in
         openmpi)
