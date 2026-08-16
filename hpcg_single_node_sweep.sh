@@ -169,8 +169,9 @@ run() {
     esac
 }
 
+HST=$(hostname -s)
 # From hpcg_common.sh
-RUN_ROOT=$(print_run_root "${SLURM_SUBMIT_DIR:-$PWD}" "")
+RUN_ROOT=$(print_run_root "${SLURM_SUBMIT_DIR:-$PWD}" "${HST}_s_")
 
 FAILED_LOG="$RUN_ROOT/failed_runs.log"
 
@@ -223,9 +224,11 @@ run_benchmark() {
         openmpi)
             MPI_ARGS+=(--host localhost)
             MPI_ARGS+=(-np "$ntasks")
-            MPI_ARGS+=(--map-by slot:PE="$cpus_per_task")
-            MPI_ARGS+=(--bind-to core)
+            MPI_ARGS+=(--map-by slot:PE="$cpus_per_task":HWTCPUS)
+            MPI_ARGS+=(--bind-to hwthread)
             MPI_ARGS+=(-x FI_PROVIDER)
+            MPI_ARGS+=(-x OMP_NUM_THREADS)
+            MPI_ARGS+=(-x MKL_NUM_THREADS)
             if (( RUNNING_ON_GNR )); then
                 MPI_ARGS+=(--mca btl 'self,sm')
             fi
@@ -233,8 +236,10 @@ run_benchmark() {
         intel)
             MPI_ARGS+=(-hosts localhost)
             MPI_ARGS+=(-n "$ntasks")
+            MPI_ARGS+=(-genv I_MPI_PIN 1)
+            MPI_ARGS+=(-genv I_MPI_PIN_CELL unit)
             MPI_ARGS+=(-genv I_MPI_PIN_DOMAIN "$cpus_per_task")
-            MPI_ARGS+=(-genvlist FI_PROVIDER)
+            MPI_ARGS+=(-genvlist 'FI_PROVIDER,OMP_NUM_THREADS,MKL_NUM_THREADS')
             if (( RUNNING_ON_GNR )); then
                 MPI_ARGS+=(-genv I_MPI_FABRICS shm)
             fi
