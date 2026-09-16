@@ -25,7 +25,7 @@ module load mpi/2021.15 libfabric/1.13.0
 # DistributedSteam to use float) being used, in bytes
 STREAM_TYPE_SIZE=8
 # Size of the last level CPU cache, in bytes
-LL_CACHE_SIZE=44040192
+LL_CACHE_SIZE="${LL_CACHE_SIZE:-37486592}"
 # How many times DistributedStream will repeat the benchmark before 
 # calculating the min/max/mean
 N_RUNS=30
@@ -116,7 +116,7 @@ UTC_NOW=$(date -u +%Y-%m-%dT%H%M%SZ)
 RUN_DIR="ds_single_node_sweep_${UTC_NOW}"
 mkdir -p "$RUN_DIR"
 
-FAILED_LOG="$RUN_ROOT/failed_runs.log"
+FAILED_LOG="$RUN_DIR/failed_runs.log"
 
 cd "$RUN_DIR" || exit 1
 
