@@ -21,12 +21,13 @@ module load mpi/2021.15
 # socket count
 # normal: 2
 # icx: 2
-# gnr: 2
-NTASKS=2
+# gnr: 6
+NTASKS="${NTASKS:-2}"
+PPN="${PPN:-3}" # Only really used for gnr
 # Use calc_hpcg_problem_size.py to get problem size
 # normal: 328,328,328
 # icx: 360,360,368
-# gnr: 624,624,624
+# gnr: 656,656,664 (capped @ 424,424,424 for LP64)
 NX="${NX:-328}"
 NY="${NY:-328}"
 NZ="${NZ:-328}"
@@ -46,10 +47,12 @@ fi
 
 # normal: 24
 # icx: 28
-# gnr: 120
-export OMP_NUM_THREADS=24
-export MKL_NUM_THREADS=24
-export KMP_AFFINITY=granularity=fine,compact
+# gnr: 6r:40t or 2r:120t
+OMP_NUM_THREADS="${OMP_NUM_THREADS:-24}"
+MKL_NUM_THREADS="${MKL_NUM_THREADS:-24}"
+
+export OMP_NUM_THREADS
+export MKL_NUM_THREADS
 
 MPI_WRAPPER=''
 HPCG_COMMON=''
@@ -87,9 +90,13 @@ mpi_configure_user() {
             MPI_ARGS+=(-hosts localhost)
             MPI_ARGS+=(-n "$NTASKS")
             MPI_ARGS+=(-genv I_MPI_PIN 1)
+            MPI_ARGS+=(-genv I_MPI_DEBUG 5)
             MPI_ARGS+=(-genv I_MPI_PIN_DOMAIN numa)
+            MPI_ARGS+=(-genv KMP_AFFINITY granularity='fine,compact,1,0')
+            MPI_ARGS+=(-genvlist 'FI_PROVIDER,OMP_NUM_THREADS,MKL_NUM_THREADS')
             if (( RUNNING_ON_GNR )); then
                 MPI_ARGS+=(-genv I_MPI_FABRICS shm)
+                MPI_ARGS+=(-ppn "$PPN")
             fi
             ;;
         *)
@@ -129,7 +136,8 @@ run() {
     esac
 }
 
-RUN_ROOT=$(print_run_root "$PWD" "intel_nosweep_")
+HST="$(hostname -s)"
+RUN_ROOT=$(print_run_root "$PWD" "intel_nosweep_${HST}_")
 mkdir -p "$RUN_ROOT"
 
 write_hpcg_dat "$RUN_ROOT" "$NX" "$NY" "$NZ" "$HPCG_RUN_TIME"
