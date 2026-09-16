@@ -6,8 +6,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 # Make sure we don't use Intel MPI, spack will load OpenMPI for us
 module unload mpi openmpi mpich
 
-# Bytes per equation is ~715 on amd01
-# Problem size is hardcoded for nextgenio-amd01
+# Bytes per equation is ~715 on amd02
+# Problem size is hardcoded for nextgenio-amd02
 NX="${NX:-144}"
 NY="${NY:-144}"
 NZ="${NZ:-144}"
@@ -33,7 +33,7 @@ fi
 # shellcheck source=./hpcg_common.sh
 source "$HPCG_COMMON"
 
-AOCC_LOC=$(spack location -i aocc)
+AOCC_LOC=$(spack location -i "aocc@$AOCC_VERSION")
 HPCG_LOC=$(spack location -i hpcg)
 
 # This is the correct value for the EPYC 7502, despite AMD's HPCG docs
