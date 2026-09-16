@@ -17,7 +17,7 @@ module load compiler/2023.0.0
 module load mkl/2023.0.0
 module load mpi/2021.15
 
-# The implementation decison logic can definitely be improved
+# The implementation decision logic can definitely be improved
 IMPLEMENTATION="${1:-intel}"
 declare -a R_LIST
 
@@ -74,6 +74,7 @@ BPE_NORMAL=715
 BPE_ILP64=839
 BYTES_PER_EQUATION="${BYTES_PER_EQUATION:-$BPE_NORMAL}"
 HPCG_RUN_TIME="${HPCG_RUN_TIME:-60}"
+CLAMPSZ="${CLAMPSZ:-424}"
 
 usage() {
     printf "Usage: %s [intel|intel_ilp64|amd]\n" "$0" >&2
@@ -165,10 +166,10 @@ mpi_detect_implementation || exit 1
 BINARY_PATH=$(resolve_binary XHPCG_BIN "$XHPCG_BIN") || exit 1
 
 round_mult8() {
-    awk -v s="$1" -v clamp="${2:-0}" 'BEGIN {
+    awk -v s="$1" -v clamp="${2:-0}" -v clampsz="$CLAMPSZ" 'BEGIN {
         n = int((s + 4) / 8) * 8
         if (n < 24) n = 24
-        if ((clamp == "1" || clamp == "true") && n > 424) n = 424
+        if ((clamp == "1" || clamp == "true") && n > clampsz) n = clampsz
         print n
     }'
 }
