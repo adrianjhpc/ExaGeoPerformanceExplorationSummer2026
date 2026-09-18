@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-# Please note this script was written almost entiely by GPT 5.5 and manually
-# reviewed and tested by me
+# AI disclosure: ~99% of this file was written by GPT 5.5
 
 import argparse
 import csv
