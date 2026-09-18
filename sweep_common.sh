@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# AI disclosure: original human written code in this file has been heavily
+# refactored by GLM-5.2
 # Generic single-node task/CPU sweep
 # The sourcing script MUST define:
 #   MAX_TOTAL_CPUS:    logical CPU capacity of the node

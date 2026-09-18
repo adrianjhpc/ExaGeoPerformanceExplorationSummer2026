@@ -2,6 +2,7 @@
 import argparse
 import math
 
+# AI disclosure: ~90% of this was file written by GPT 5.6 Luna
 
 def round_multiple_of_8(value: float) -> int:
     """Round to the nearest multiple of 8, with a minimum of 24."""

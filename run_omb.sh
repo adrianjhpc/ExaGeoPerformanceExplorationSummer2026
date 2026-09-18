@@ -4,6 +4,7 @@
 #SBATCH --nvram-options=none
 set -euo pipefail
 
+# AI disclosure: ~60% of this file was written by GLM-5.2
 # ./run_omb.sh [host1[,host2,...]] # or set HOSTS
 # if there are 0/1 hosts: collective, one-sided, pt2pt and startup groups (no
 # congestion tests) are run. 0 hosts means run on localhost

@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# This code was mostly written by GPT 5.6 Luna. It's quite verbose but it
-# works
+# AI disclosure: ~90% of this file was written by GPT 5.6 Luna
 # mpi_wrapper.sh
 # Examples:
 #   ./mpi_wrapper.sh --np 8 --hosts node01,node02 -- ./program arg1
