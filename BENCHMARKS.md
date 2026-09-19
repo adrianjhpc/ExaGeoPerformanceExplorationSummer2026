@@ -34,7 +34,7 @@ The following definitions are used throughout this document:
 
 |      |                                        |
 |------|----------------------------------------|
-| p    | process                                |
+| p    | MPI process                            |
 | t    | thread                                 |
 | BW   | bandwidth                              |
 | DS   | DistributedStream                      |
