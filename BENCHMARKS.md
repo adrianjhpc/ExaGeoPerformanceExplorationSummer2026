@@ -149,7 +149,7 @@ CLAMP_PROB_SIZE=1 ./hpcg_single_node_sweep.sh amd
 
 ![HPCG p/t sweep (nextgenio-amd02, 64 physical cores == p×t)](images/hpcg_nextgenio-amd02.svg)
 
-In this test there is a noticable HPCG result gap between AMD's recommendation
+In this test there is a noticeable HPCG result gap between AMD's recommendation
 of 2p2t per CCX for the EPYC 7502 and the sweep script's generic affinity
 behaviour.
 
@@ -218,6 +218,7 @@ cd $HOME/benchmarks
 ```
 
 ## System information
+
 Below are OS name, kernel version, memory capacity and `lscpu` outputs for each
 system tested.
 
