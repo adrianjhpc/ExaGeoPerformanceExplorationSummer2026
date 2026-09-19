@@ -1,0 +1,11 @@
+WARNING: PERFORMING UNPRECONDITIONED ITERATIONS
+Call [0] Number of Iterations [11] Scaled Residual [1.77848e-14]
+WARNING: PERFORMING UNPRECONDITIONED ITERATIONS
+Call [1] Number of Iterations [11] Scaled Residual [1.77848e-14]
+Call [0] Number of Iterations [2] Scaled Residual [2.94495e-17]
+Call [1] Number of Iterations [2] Scaled Residual [2.94495e-17]
+Departure from symmetry (scaled) for SpMV abs(x'*A*y - y'*A*x) = 5.56219e-12
+Departure from symmetry (scaled) for MG abs(x'*Minv*y - y'*Minv*x) = 1.11244e-11
+SpMV call [0] Residual [0]
+SpMV call [1] Residual [0]
+Call [0] Scaled Residual [0.00445331]
