@@ -23,9 +23,9 @@ filled less than 25% of the system's total memory capacity.
 
 If you run the scripts in unscheduled mode (i.e. outwith SLURM) then please
 remember to either run the script in the background using `nohup` (not
-recommended), or better, run it in the by detaching from a `screen` (gnr) or
-`tmux` (all other nodes) session to prevent your run from exiting when you end
-your SSH session.
+recommended), or better, run it in the background by detaching from a `screen`
+(gnr) or `tmux` (all other nodes) session to prevent your run from exiting when
+you end your SSH session.
 
 Please complete the setup process as described in [README](./README.md)
 before running the benchmarks.
@@ -113,7 +113,7 @@ In this test, icx has similar p = 1 scaling behaviour to amd01.
 
 ### nextgenio-cn18 (normal) HPCG
 
-To run the vendor-recommended settings:
+To run with the vendor-recommended settings:
 
 ```bash
 cd $HOME/benchmarks
@@ -133,7 +133,7 @@ In this test, nextgenio-cn18's HPCG result remained insensitive to varying p/t d
 
 ### nextgenio-amd01 (amd) HPCG
 
-To run the vendor-recommended settings:
+To run with the vendor-recommended settings:
 
 ```bash
 cd $HOME/benchmarks
@@ -155,7 +155,7 @@ behaviour.
 
 ### nextgenio-gnr (gnr) HPCG
 
-To run the vendor-recommended settings:
+To run with the vendor-recommended settings:
 
 ```bash
 cd $HOME/benchmarks
@@ -178,7 +178,7 @@ natural division).
 
 ### nextgenio-icx (icx) HPCG
 
-To run the vendor-recommended settings:
+To run with the vendor-recommended settings:
 
 ```bash
 cd $HOME/benchmarks
