@@ -1,39 +1,16 @@
-# NEXTGenIO Benchmarks (August 2026)
+# NEXTGenIO Benchmarks README (September 2026)
 
-## Benchmark summary
+## Benchmark results
 
-Detailed results for each system can be found in [BENCHMARKS](BENCHMARKS.md).
+Detailed results for each system can be found in [BENCHMARKS](./BENCHMARKS.md).
 
-| Benchmark               | normal      | amd           | gnr           | icx           |
-|-------------------------|-------------|---------------|---------------|---------------|
-| DistributedStream sweep | `Ii`        | `Ii`*         | `Ii`‡         | `Ii`          |
-| HPCG Intel recommended  | `Ii`        | -             | `Ii`†         | `Ii`          |
-| HPCG AMD recommended    | -           | `AO`          | -             | -             |
-| HPCG Intel sweep        | `Ii`†       | -             | `Ii`†         | `Ii`†         |
-| HPCG AMD sweep          | -           | `AO`          | -             | -             |
+The raw benchmark data can be found under `data/`.
 
-All benchmarks were executed on a single compute node.
-
-`-`: Not applicable, `I`: Intel MPI Library 2021.15, `i`: Intel OneAPI Compiler
-2023.0.0, `A`: AMD AOCC 5.2.0, `O`: Open MPI 5.0.10
-
-\*: Compiled with the Intel OneAPI compiler, rather than AOCC. May not have
-optimal performance on an AMD processor.
-
-‡: Due to stability issues, this benchmark was only tested with 1 MPI process.
-
-†: Had the problem size capped to prevent crashes. Some runs filled less than
-25% of the system's total memory capacity.
-
-If you run the scripts in MPI mode (not a scheduler) then please remember to
-either run the script in the background using `nohup`, or run it in
-the background using `screen` (gnr) or `tmux` (all other nodes).
-
-## DistributedStream
+## DistributedStream (DS)
 
 <https://github.com/adrianjhpc/DistributedStream>
 
-### Building DistributedStream with the Intel OneAPI compiler
+### Building DistributedStream with oneAPI + Intel MPI
 
 * You will need to build Mini-XML version 3.3.1
  (<https://github.com/michaelrsweet/mxml/releases/tag/v3.3.1>) as it is not
@@ -86,14 +63,11 @@ module load compiler mpi
 
 * I arbitrarily chose to use 30 repeats of the benchmark
 * DistributedStream is not compatible with mxml v4 or later
-* I was only able to build this with the Intel OneAPI compiler, so the AMD
- results may not be representative
-* DistributedStream was built from git commit
-c6534ccff8f6599b1d7c14d60c3b628ef85fbc8c
+* DistributedStream was built from git commit `c6534cc`
 
-## HPCG Benchmark
+## High Performance Conjugate Gradient (HPCG)
 
-### Building and running the Intel optimised HPCG benchmark
+### Building and running the Intel optimised HPCG benchmark with oneAPI + Intel MPI
 
 [Intel® Optimized High Performance Conjugate Gradient Benchmark](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2026-0/intel-opt-high-perf-conjugate-gradient-benchmark.html)  
 [Getting Started with Intel® CPU Optimized HPCG](https://www.intel.com/content/www/us/en/docs/onemkl/developer-guide-linux/2026-0/getting-started-with-intel-cpu-optimized-hpcg.html)
@@ -160,7 +134,7 @@ And replace the final `make` with:
 make HPCG_ILP64=yes
 ```
 
-### Building and running the AMD optimised HPCG benchmark
+### Building and running the AMD optimised HPCG benchmark with AOCC + Open MPI
 
 <https://www.amd.com/en/developer/zen-software-studio/applications/spack/hpcg-benchmark.html>
 
@@ -343,15 +317,15 @@ spack load hpcg
 # ...
 ```
 
-* A reliable (non-gnr) ceiling I found for the standard HPCG build's problem
- size is 424^3 on the NextGenIO systems. Any larger than this will require a
- build with 64-bit global indices (ILP64)
+* A reliable (except on gnr) ceiling I found for the standard HPCG build's
+problem size is 424^3 on the NextGenIO systems. Any larger than this will
+require a build with 64-bit global indices (ILP64).
 
-## OSU Micro-Benchmarks
+## OSU Micro-Benchmarks (OMB)
 
 <https://mvapich.cse.ohio-state.edu/benchmarks/>
 
-### Building and running the OSU Micro-Benchmarks
+### Building and running the OSU Micro-Benchmarks with oneAPI + Intel MPI
 
 * Load modules needed to build and run OMB:
 
